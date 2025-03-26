@@ -1,0 +1,214 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "title": "Lendflow API",
+        "version": "1.0.0",
+        "description": "API documentation for the Lendflow application"
+    },
+    "paths": {
+        "/api/v1/bestsellers": {
+            "get": {
+                "tags": [
+                    "Best Seller"
+                ],
+                "summary": "Get Best Seller Books",
+                "parameters": [
+                    {
+                        "name": "author",
+                        "in": "query",
+                        "type": "string",
+                        "description": "Author of the book"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Returns the best seller list",
+                        "schema": {
+                            "$ref": "#/definitions/BestSellerResource"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/health": {
+            "get": {
+                "summary": "Check the health of the API",
+                "operationId": "getHealth",
+                "tags": [
+                    "Health"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "API is healthy",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "status": {
+                                    "type": "string",
+                                    "example": "OK"
+                                },
+                                "database": {
+                                    "type": "string",
+                                    "example": "Error"
+                                },
+                                "cache": {
+                                    "type": "string",
+                                    "example": "Error"
+                                },
+                                "timestamp": {
+                                    "type": "string",
+                                    "example": "2025-03-26T18:49:27.069187Z"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Server error",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "status": {
+                                    "type": "string",
+                                    "example": "ERROR"
+                                },
+                                "message": {
+                                    "type": "string",
+                                    "example": "Internal Server Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/start-job": {
+            "post": {
+                "tags": [
+                    "Job"
+                ],
+                "summary": "Start a background job",
+                "description": "Start a job that will run in the background and return a job ID for status checks.",
+                "operationId": "startJob",
+                "responses": {
+                    "202": {
+                        "description": "Job started successfully",
+                        "schema": {
+                            "$ref": "#/definitions/JobResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/job-status/{job_id}": {
+            "get": {
+                "tags": [
+                    "Job"
+                ],
+                "summary": "Check the status of the job",
+                "description": "Retrieve the current status of a background job using its job ID.",
+                "operationId": "checkJobStatus",
+                "parameters": [
+                    {
+                        "name": "job_id",
+                        "in": "path",
+                        "description": "The unique job ID to check the status of.",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Job status retrieved successfully",
+                        "schema": {
+                            "$ref": "#/definitions/JobStatusResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Job not found",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "BestSellerResource": {
+            "type": "object",
+            "properties": {
+                "author": {
+                    "type": "string"
+                },
+                "isbns": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "title": {
+                    "type": "string"
+                },
+                "offset": {
+                    "type": "integer"
+                }
+            }
+        },
+        "JobResponse": {
+            "type": "object",
+            "properties": {
+                "job_id": {
+                    "type": "string",
+                    "example": "e56d7367-0402-48ff-b7f0-c606d93c88d4"
+                },
+                "message": {
+                    "type": "string",
+                    "example": "Job started, check status using /api/job-status/{job_id}"
+                }
+            }
+        },
+        "JobStatusResponse": {
+            "type": "object",
+            "properties": {
+                "status": {
+                    "type": "string",
+                    "enum": [
+                        "pending",
+                        "completed",
+                        "failed"
+                    ],
+                    "example": "pending"
+                },
+                "message": {
+                    "type": "string",
+                    "example": "Job is still processing."
+                }
+            }
+        },
+        "ErrorResponse": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string",
+                    "example": "Failed to process request"
+                },
+                "message": {
+                    "type": "string",
+                    "example": "Internal server error"
+                }
+            }
+        }
+    }
+}
